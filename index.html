@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js" type="module" async></script>
+</head>
+
+<body>
+
+    <ul id="todoList"></ul>
+    <input type="text" id="mission" name="mission" value="mission">
+    <button id="btn">Add Mission</button>
+
+</body>
+
+<script id="todoItemTemplate" type="text/template">
+        <li data-id="{{id}}" class="todoItem">
+            <span>{{message}}</span>
+            <button class="deleteBtn">[Удалить]</button>
+        </li>
+    </script>
+
+</html>
