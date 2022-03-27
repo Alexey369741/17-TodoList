@@ -14,15 +14,19 @@
 <body>
 
     <ul id="todoList"></ul>
-    <input type="text" id="mission" name="mission" value="mission">
-    <button id="btn">Add Mission</button>
+
+    <form id="todoform">
+
+        <input type="text" id="mission" name="mission" value="mission">
+        <button id="btn">Add Mission</button>
+
+    </form>
 
 </body>
 
-<script id="todoItemTemplate" type="text/template">
-        <li data-id="{{id}}" class="todoItem">
-            <span>{{message}}</span>
-            <button class="deleteBtn">[Удалить]</button>
+<script id="newTaskTemplate" type="text/template">
+        <li data-id="{{id}}" data-status="{{status}}" class="todo-item {{done}}">
+            <span class="remove-button">[Delete]</span>
         </li>
     </script>
 

@@ -1,100 +1,115 @@
-import TodoApi from "./TodoApe.js"
+import TodoApi from "./TodoApi.js";
 
-const btn = document.querySelector('#btn');
-const todoList = document.querySelector('#todolist');
-const writeMission = doucument.querySelector('#mission');
-const todoItemTemplate = document.querySelector('#todoItemTemplate');
+const REMOVE_BTN_CLASS = 'remove-button';
+const DONE_CLASS = 'done';
+const TODO_ITEM_CLASS = 'todo-item';
 
+const list = document.querySelector('.todo-list');
+const input = document.querySelector('.message-input');
+const todoForm = document.querySelector('#todoForm');
+const todoTemplateHTML = document.querySelector('#newTaskTemplate').innerHTML;
 
-btn.addEventListener('click', onBtnClick);
-todoList.addEventListener('click', onListClick);
+todoForm.addEventListener('submit', onTodoFormSubmit);
+list.addEventListener('click', onTodoListClick);
 
 init();
 
 function init() {
-    TodoApi
-        .getList()
+    TodoApi.getList()
         .then(renderTodoList)
         .catch(handleError);
 }
 
-function onBtnClick() {
-    const mission = getMission();
+function onTodoFormSubmit(e) {
+    e.preventDefault();
 
-    if (!isMessageValid(mission)) {
-        alert('Поле не должно быть пустым')
+    if (!isValid(input.value)) {
+        alert('Поле сообщение не должно быть пустым');
         return;
     }
 
-    addTodoItem(mission);
-    clear();
+    TodoApi
+        .create({ status: false, title: input.value })
+        .then((todo) => {
+            renderTodo(todo);
+            clear();
+        })
+        .catch(handleError);
 }
 
-function onListClick(e) {
-    const todoItem = e.target.closest('.todoItem');
+function onTodoListClick(e) {
+    const todoEl = getTodoElement(e.target);
+    const classList = e.target.classList;
 
-    if (todoItem) {
-        if (e.target.classList.contains('.deleteBtn')) {
-            removeTodo(todoItem)
-            return
+    if (todoEl) {
+        if (classList.contains(REMOVE_BTN_CLASS)) {
+            removeTodo(todoEl);
         }
-
-        e.target.classList.toggle('done');
+        if (classList.contains(TODO_ITEM_CLASS)) {
+            toggleDone(todoEl);
+        }
     }
 }
 
-function removeTodo(todoEl) {
+function getTodoElement(target) {
+    return target.closest('.' + TODO_ITEM_CLASS);
+}
+
+function isValid(message) {
+    return message !== '';
+}
+
+function renderTodoList(todoList) {
+    const html = todoList.map(generateTodoHTML).join('');
+
+    list.insertAdjacentHTML('beforeend', html);
+}
+
+function renderTodo(todo) {
+    const html = generateTodoHTML(todo);
+
+    list.insertAdjacentHTML('beforeend', html);
+}
+
+function generateTodoHTML(todo) {
+    const done = todo.status ? DONE_CLASS : '';
+
+    return todoTemplateHTML
+        .replace('{{id}}', todo.id)
+        .replace('{{status}}', todo.status)
+        .replace('{{title}}', todo.title)
+        .replace('{{done}}', done)
+        ;
+}
+
+function removeTodo(el) {
     const id = getTodoElId(el);
 
-    TodoApi.delete(id)
-    todoEl.remove();
+    TodoApi
+        .delete(id)
+        .catch(handleError);
+    el.remove();
+}
+
+function toggleDone(el) {
+    const id = getTodoElId(el);
+    const status = el.dataset.status !== 'true';
+
+    TodoApi
+        .update(id, { status })
+        .catch(handleError);
+
+    el.classList.toggle(DONE_CLASS);
 }
 
 function getTodoElId(el) {
     return el.dataset.id;
 }
 
-function getMission() {
-    return writeMission.value;
-}
-
-function isMessageValid(mission) {
-    return mission.trim() !=='';
-}
-
-function addTodoItem(mission) {
-    TodoApi.create({})
-}
-
-function renderTodoItem(mission) {
-    const todoItemHTML = todoItemTemplate.replace(`{{message}}`, mission);
-
-    todoList.insertAdjacentHTML(`beforeend`, todoItemHTML);
-}
-
-function renderTodoList(todoList) {
-    const html = todoList.map(genereteTodoHTML).join('');
-
-    todoList.insertAdjacentHTML(`beforeend`, html);
-}
-
-function renderTodo(mission) {
-    const html = genereteTodoHTML(mission);
-
-    list.insertAdjacentHTML(`beforeend`, html);
-}
-
-function
- genereteTodoHTML(mission) {
-     return todoItemTemplate
-     .replace(`{{id}}`, mission)
-     .replace(`{{name}}`, mission.name);
- }
-
- function handleError(e) {
-     alert(e.message);
- }
-
 function clear() {
-    writeMission.value = '';
+    input.value = '';
+}
+
+function handleError(e) {
+    alert(e.message);
 }
